@@ -1,16 +1,58 @@
-# React + Vite
+# CoachCorner 🏀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Progressive Web App for managing basketball player rotations in 5x5 games.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Player Management**: Add, edit, and remove players from your team roster
+- **Smart Rotations**: Pre-configured rotation patterns for 6-12 players ensuring fair playing time
+- **Drag & Drop**: Easily reorder your lineup with touch-friendly drag-and-drop
+- **Period Carousel**: Swipe through game periods to see who's on court and on bench
+- **Full Chart View**: Toggle to see the complete rotation grid
+- **Offline Support**: Works without internet connection (PWA)
+- **Install to Home Screen**: Add to your phone's home screen for an app-like experience
 
-## React Compiler
+## Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### As a Progressive Web App (Recommended)
 
-## Expanding the ESLint configuration
+1. Open the app in your mobile browser
+2. Tap the **Share** button (iOS) or **Menu** (Android)
+3. Select **"Add to Home Screen"**
+4. The app will now launch like a native app with no browser UI
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### For Development
+
+```bash
+npm install
+npm run dev
+```
+
+## How to Use
+
+1. **Manage Team**: Add players with their name and jersey number
+2. **Game Setup**: 
+   - Step 1: Select which players are available for the game
+   - Step 2: Drag to reorder players and set your starting lineup
+3. **Game Plan**: 
+   - Swipe through periods to see rotations
+   - Click "Full Chart" to view the complete rotation grid
+   - Each period shows exactly who should be on court and on bench
+
+## Rotation Logic
+
+- **8 Periods** per game (4 quarters × 2 sessions)
+- **Exactly 5 players** on court at all times
+- **Fair distribution** of playing time based on team size
+- Patterns optimized for 6-12 player rosters
+
+## Tech Stack
+
+- React + Vite
+- Vanilla CSS
+- @dnd-kit for drag-and-drop
+- vite-plugin-pwa for Progressive Web App features
+
+## License
+
+MIT
