@@ -1,0 +1,220 @@
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Roboto+Condensed:wght@400;700&display=swap');
+
+:root {
+  /* NBA/Basketball Palette */
+  --bg-primary: #1a1a1a;
+  /* Dark Asphalt */
+  --bg-secondary: #2d2d2d;
+  /* Lighter Asphalt */
+  --bg-court: #e6b083;
+  /* Wood Court (used sparingly) */
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-orange: #f58426;
+  /* Basketball Orange */
+  --accent-orange-dim: #c25e00;
+  --accent-blue: #1d428a;
+  /* NBA Blue */
+  --accent-red: #c9082a;
+  /* NBA Red */
+  --success: #00b349;
+  --danger: #ff3b30;
+
+  --border-color: #444444;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+
+  --font-heading: 'Russo One', sans-serif;
+  --font-body: 'Roboto Condensed', sans-serif;
+
+  --shadow-card: 0 8px 16px rgba(0, 0, 0, 0.3);
+  --shadow-neon: 0 0 10px rgba(245, 132, 38, 0.5);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(29, 66, 138, 0.1) 0%, transparent 50%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 26, 26, 1) 100%);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+#root {
+  max-width: 600px;
+  /* Mobile focused max-width */
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 0px var(--accent-blue);
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-orange-dim) 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  /* Pill shape */
+  font-weight: 400;
+  box-shadow: var(--shadow-neon);
+  width: 100%;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 20px rgba(245, 132, 38, 0.8);
+}
+
+.btn-primary:disabled {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 400;
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+}
+
+input {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent-orange);
+}
+
+/* Jersey Card Style */
+.player-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: linear-gradient(to right, #333, #2d2d2d);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--accent-blue);
+  margin-bottom: 0.5rem;
+}
+
+.jersey-number {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--accent-orange);
+  width: 40px;
+  text-align: center;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.player-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-grow: 1;
+  text-align: left;
+  padding-left: 0.5rem;
+}
+
+/* Utilities */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.text-sm {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--border-color);
+}
+
+.step-dot.active {
+  background-color: var(--accent-orange);
+  box-shadow: 0 0 5px var(--accent-orange);
+}
