@@ -20,7 +20,8 @@ export function GameProvider({ children }) {
             ]
         },
         playerStats: {},
-        scoringEvents: []
+        scoringEvents: [],
+        actualParticipation: {} // { periodIndex: [playerId, playerId...] }
     });
 
     const startGame = useCallback((roster, rotationMatrix) => {
@@ -47,6 +48,11 @@ export function GameProvider({ children }) {
             };
         });
 
+        // Record initial participation
+        const initialParticipation = {
+            0: activePlayers.map(p => p.id)
+        };
+
         setGameState({
             isLive: true,
             currentPeriod: 0,
@@ -64,7 +70,8 @@ export function GameProvider({ children }) {
                 ]
             },
             playerStats,
-            scoringEvents: []
+            scoringEvents: [],
+            actualParticipation: initialParticipation
         });
     }, []);
 
@@ -77,10 +84,18 @@ export function GameProvider({ children }) {
                 p.id === benchPlayerId ? prev.activePlayers.find(ap => ap.id === courtPlayerId) : p
             );
 
+            // Update participation for current period
+            const currentParticipation = prev.actualParticipation[prev.currentPeriod] || [];
+            const newParticipation = [...new Set([...currentParticipation, benchPlayerId])];
+
             return {
                 ...prev,
                 activePlayers: newActive,
-                benchPlayers: newBench
+                benchPlayers: newBench,
+                actualParticipation: {
+                    ...prev.actualParticipation,
+                    [prev.currentPeriod]: newParticipation
+                }
             };
         });
     }, []);
@@ -165,12 +180,19 @@ export function GameProvider({ children }) {
                 }
             });
 
+            // Record participation for new period
+            const newParticipation = newActive.map(p => p.id);
+
             return {
                 ...prev,
                 currentPeriod: newPeriod,
                 activePlayers: newActive,
                 benchPlayers: newBench,
-                playerStats: newPlayerStats
+                playerStats: newPlayerStats,
+                actualParticipation: {
+                    ...prev.actualParticipation,
+                    [newPeriod]: newParticipation
+                }
             };
         });
     }, []);

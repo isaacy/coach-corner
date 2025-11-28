@@ -1,10 +1,35 @@
 import React, { useState } from 'react';
 
+const FIRST_NAMES = ['James', 'Michael', 'Kobe', 'LeBron', 'Stephen', 'Kevin', 'Chris', 'Dwyane', 'Tim', 'Magic', 'Larry', 'Shaq'];
+
 export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlayer }) {
     const [editingId, setEditingId] = useState(null);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [number, setNumber] = useState('');
+
+    const generateTestPlayers = () => {
+        const numPlayers = 8;
+        const usedNumbers = new Set(players.map(p => parseInt(p.number)));
+
+        for (let i = 0; i < numPlayers; i++) {
+            let jerseyNum;
+            do {
+                jerseyNum = Math.floor(Math.random() * 99) + 1;
+            } while (usedNumbers.has(jerseyNum));
+
+            usedNumbers.add(jerseyNum);
+
+            const player = {
+                id: Date.now().toString() + i,
+                firstName: FIRST_NAMES[i % FIRST_NAMES.length],
+                lastName: '',
+                number: jerseyNum
+            };
+
+            onAddPlayer(player);
+        }
+    };
 
     const startEdit = (player) => {
         setEditingId(player.id);
@@ -46,7 +71,25 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
     };
 
     return (
-        <div className="card">
+        <div className="card" style={{ position: 'relative' }}>
+            {/* Invisible test button in top right */}
+            <button
+                onClick={generateTestPlayers}
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    width: '50px',
+                    height: '50px',
+                    opacity: 0,
+                    cursor: 'default',
+                    border: 'none',
+                    background: 'transparent',
+                    zIndex: 10
+                }}
+                aria-label="Generate test players"
+            />
+
             <div className="flex-between" style={{ marginBottom: '1rem' }}>
                 <h2>{editingId ? 'Edit Player' : 'Add Player'}</h2>
                 {editingId && <button onClick={cancelEdit} className="btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>Cancel</button>}
