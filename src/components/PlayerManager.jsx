@@ -79,13 +79,13 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
                     position: 'absolute',
                     top: 0,
                     right: 0,
-                    width: '50px',
-                    height: '50px',
-                    opacity: 0,
-                    cursor: 'default',
-                    border: 'none',
-                    background: 'transparent',
-                    zIndex: 10
+                    width: '60px',
+                    height: '60px',
+                    opacity: 0.1, // Make slightly visible for debugging
+                    cursor: 'pointer',
+                    border: '2px dashed var(--accent-orange)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    zIndex: 100
                 }}
                 aria-label="Generate test players"
             />
