@@ -101,6 +101,119 @@ export function RotationView({ roster, onBack }) {
           </div>
         </div>
 
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <button
+            className="btn-secondary"
+            onClick={() => setShowChart(!showChart)}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+          >
+            {showChart ? 'Hide Chart' : 'Show Full Chart'}
+          </button>
+        </div>
+
+        {showChart && (
+          <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            margin: '0 0 1rem 0',
+            borderRadius: 'var(--radius-md)',
+            overflowX: 'auto'
+          }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: `120px repeat(${periods}, 1fr) 50px`,
+              gap: '1px',
+              minWidth: '600px'
+            }}>
+              <div style={{ padding: '0.5rem', fontWeight: 'bold', fontSize: '0.8rem' }}>Player</div>
+              {Array.from({ length: periods }).map((_, i) => (
+                <div key={i} style={{
+                  padding: '0.5rem',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  backgroundColor: gameState.isLive && i === gameState.currentPeriod ? 'rgba(245, 132, 38, 0.2)' : 'transparent',
+                  borderBottom: gameState.isLive && i === gameState.currentPeriod ? '2px solid var(--accent-orange)' : 'none'
+                }}>P{i + 1}</div>
+              ))}
+              <div style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>Tot</div>
+
+              {roster.map((player, rowIndex) => (
+                <React.Fragment key={player.id}>
+                  <div style={{ padding: '0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-primary)' }}>
+                    <span style={{ color: 'var(--accent-orange)', marginRight: '0.25rem' }}>#{player.number}</span> {player.firstName}
+                  </div>
+                  {Array.from({ length: periods }).map((_, colIndex) => {
+                    // Determine cell style and content based on game state
+                    let backgroundColor = 'var(--bg-primary)';
+                    let opacity = 0.2;
+                    let content = null;
+
+                    if (gameState.isLive) {
+                      const isCurrentPeriod = colIndex === gameState.currentPeriod;
+                      const isPastPeriod = colIndex < gameState.currentPeriod;
+                      const isFuturePeriod = colIndex > gameState.currentPeriod;
+
+                      // Calculate points for this period
+                      const pointsInPeriod = gameState.scoringEvents
+                        .filter(e => e.period === colIndex && e.playerId === player.id)
+                        .reduce((sum, e) => sum + e.points, 0);
+
+                      if (pointsInPeriod > 0) {
+                        content = <span style={{ fontWeight: 'bold', color: 'white' }}>{pointsInPeriod}</span>;
+                      }
+
+                      if (isCurrentPeriod) {
+                        const isActive = gameState.activePlayers.some(p => p.id === player.id);
+                        const hasPlayed = gameState.actualParticipation[colIndex]?.includes(player.id);
+
+                        if (isActive) {
+                          backgroundColor = 'var(--accent-orange)'; // Currently playing -> Orange
+                          opacity = 0.8;
+                        } else if (hasPlayed) {
+                          backgroundColor = 'var(--danger)'; // Subbed out -> Red
+                          opacity = 0.6;
+                        }
+                      } else if (isPastPeriod) {
+                        const playedInPast = gameState.actualParticipation[colIndex]?.includes(player.id);
+                        if (playedInPast) {
+                          backgroundColor = 'var(--danger)'; // Played in past -> Red
+                          opacity = 0.6;
+                        }
+                      } else if (isFuturePeriod) {
+                        // Show planned rotation
+                        const isPlanned = matrix[rowIndex] && matrix[rowIndex][colIndex] === 1;
+                        if (isPlanned) {
+                          backgroundColor = 'var(--success)';
+                          opacity = 0.3;
+                        }
+                      }
+                    }
+
+                    return (
+                      <div key={colIndex} style={{
+                        backgroundColor,
+                        opacity,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.8rem'
+                      }}>
+                        {content}
+                      </div>
+                    );
+                  })}
+                  <div style={{ padding: '0.5rem', textAlign: 'center', fontSize: '0.8rem', backgroundColor: 'var(--bg-primary)' }}>
+                    {gameState.isLive && gameState.playerStats[player.id]
+                      ? gameState.playerStats[player.id].points
+                      : playerStats[rowIndex].periodsPlayed}
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        )}
+
         <ScoreTracker />
 
         <div style={{ marginBottom: '1.5rem' }}>
