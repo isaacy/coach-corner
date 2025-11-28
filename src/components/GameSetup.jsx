@@ -1,88 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ROTATIONS } from '../logic/rotationPatterns';
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    TouchSensor
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-    useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-
-function SortablePlayerItem({ player, index, isStarter }) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging
-    } = useSortable({ id: player.id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: isDragging ? 10 : 1,
-        opacity: isDragging ? 0.8 : 1,
-        touchAction: 'none' // Important for mobile drag
-    };
-
-    return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            {...attributes}
-            {...listeners}
-            className="player-card"
-        >
-            <div style={{
-                borderLeft: isStarter ? '4px solid var(--success)' : '4px solid var(--border-color)',
-                display: 'flex',
-                alignItems: 'center',
-                width: '100%',
-                padding: '0.5rem',
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: 'var(--radius-md)'
-            }}>
-                <div style={{ marginRight: '1rem', color: 'var(--text-secondary)', fontSize: '1.5rem', cursor: 'grab' }}>
-                    ☰
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexGrow: 1 }}>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', width: '20px' }}>{index + 1}</span>
-                    <span className="jersey-number" style={{ fontSize: '1.2rem', width: '30px' }}>{player.number}</span>
-                    <span className="player-name">{player.firstName}</span>
-                    {isStarter && <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--success)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>START</span>}
-                </div>
-            </div>
-        </div>
-    );
-}
 
 export function GameSetup({ allPlayers, selectedPlayerIds, onToggleSelection, onStartGame, onUpdateOrder }) {
     const [step, setStep] = useState(1); // 1: Select, 2: Order
     const [orderedPlayers, setOrderedPlayers] = useState([]);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(TouchSensor, {
-            activationConstraint: {
-                delay: 250, // Slight delay to prevent accidental drags while scrolling
-                tolerance: 5,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
+    const [swapSourceIndex, setSwapSourceIndex] = useState(null);
 
     useEffect(() => {
         // Sync orderedPlayers with selection
@@ -99,118 +21,163 @@ export function GameSetup({ allPlayers, selectedPlayerIds, onToggleSelection, on
             newList = [...newList, ...newPlayers];
         }
 
-        setOrderedPlayers(newList);
-        onUpdateOrder(newList);
-    }, [selectedPlayerIds, allPlayers, onUpdateOrder]); // Added onUpdateOrder to dependency array
+        // Only update if actually changed to avoid loops
+        if (newList.length !== orderedPlayers.length || !newList.every((p, i) => p.id === orderedPlayers[i]?.id)) {
+            setOrderedPlayers(newList);
+            onUpdateOrder(newList);
+        }
+    }, [selectedPlayerIds, allPlayers]);
 
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
+    const handleNext = () => {
+        if (selectedPlayerIds.length < 5) {
+            alert("Please select at least 5 players.");
+            return;
+        }
+        setStep(2);
+    };
 
-        if (active.id !== over.id) {
-            const oldIndex = orderedPlayers.findIndex((p) => p.id === active.id);
-            const newIndex = orderedPlayers.findIndex((p) => p.id === over.id);
-
-            const newOrder = arrayMove(orderedPlayers, oldIndex, newIndex);
-            setOrderedPlayers(newOrder);
-            onUpdateOrder(newOrder);
+    const handlePlayerClick = (index) => {
+        if (swapSourceIndex === null) {
+            setSwapSourceIndex(index);
+        } else {
+            // Swap
+            if (swapSourceIndex !== index) {
+                const newList = [...orderedPlayers];
+                const temp = newList[swapSourceIndex];
+                newList[swapSourceIndex] = newList[index];
+                newList[index] = temp;
+                setOrderedPlayers(newList);
+                onUpdateOrder(newList);
+            }
+            setSwapSourceIndex(null);
         }
     };
 
-    const playerCount = orderedPlayers.length;
-    const rotation = ROTATIONS[playerCount];
-    const startersIndices = rotation ? rotation.matrix.map((row, i) => row[0] === 1 ? i : -1).filter(i => i !== -1) : [];
+    const starters = orderedPlayers.slice(0, 5);
+    const bench = orderedPlayers.slice(5);
+
+    if (step === 1) {
+        return (
+            <div className="card">
+                <h2>Select Roster</h2>
+                <p className="text-sm" style={{ marginBottom: '1rem' }}>Select players for today's game (Min 5)</p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
+                    {allPlayers.map(player => {
+                        const isSelected = selectedPlayerIds.includes(player.id);
+                        return (
+                            <div
+                                key={player.id}
+                                onClick={() => onToggleSelection(player.id)}
+                                className={`player-card ${isSelected ? 'selected' : ''}`}
+                                style={{
+                                    cursor: 'pointer',
+                                    border: isSelected ? '2px solid var(--success)' : '2px solid transparent',
+                                    backgroundColor: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-secondary)'
+                                }}
+                            >
+                                <div className="jersey-number">{player.number}</div>
+                                <div className="player-name">{player.firstName}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className="flex-between">
+                    <span>{selectedPlayerIds.length} selected</span>
+                    <button
+                        className="btn-primary"
+                        disabled={selectedPlayerIds.length < 5}
+                        onClick={handleNext}
+                    >
+                        Next →
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="card">
-            <div className="step-indicator">
-                <div className={`step-dot ${step === 1 ? 'active' : ''}`} />
-                <div className={`step-dot ${step === 2 ? 'active' : ''}`} />
+            <div className="flex-between" style={{ marginBottom: '1rem' }}>
+                <h2>Set Lineup</h2>
+                <button className="btn-secondary" onClick={() => setStep(1)} style={{ fontSize: '0.8rem' }}>Back</button>
             </div>
 
-            <h2>{step === 1 ? 'Step 1: Select Roster' : 'Step 2: Set Lineup'}</h2>
+            <p className="text-sm" style={{ marginBottom: '1rem' }}>
+                Tap a player to select, then tap another to swap positions.
+                <br />
+                <span style={{ color: 'var(--success)' }}>Top 5 are Starters.</span>
+            </p>
 
-            {step === 1 && (
-                <>
-                    <p className="text-sm" style={{ marginBottom: '1.5rem' }}>Select players available for today's game.</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '2rem', maxHeight: '50vh', overflowY: 'auto' }}>
-                        {allPlayers.map(player => {
-                            const isSelected = selectedPlayerIds.includes(player.id);
-                            return (
-                                <div
-                                    key={player.id}
-                                    onClick={() => onToggleSelection(player.id)}
-                                    style={{
-                                        padding: '0.75rem',
-                                        borderRadius: 'var(--radius-md)',
-                                        border: `2px solid ${isSelected ? 'var(--accent-orange)' : 'var(--border-color)'}`,
-                                        backgroundColor: isSelected ? 'rgba(245, 132, 38, 0.1)' : 'var(--bg-primary)',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        textAlign: 'center'
-                                    }}
-                                >
-                                    <div className="jersey-number" style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{player.number}</div>
-                                    <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{player.firstName}</div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div className="flex-between">
-                        <div className="text-sm">Selected: {selectedPlayerIds.length}</div>
-                        <button
-                            className="btn-primary"
-                            disabled={selectedPlayerIds.length < 5}
-                            onClick={() => setStep(2)}
+            <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ color: 'var(--success)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>🏀</span> STARTERS
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {starters.map((player, i) => (
+                        <div
+                            key={player.id}
+                            onClick={() => handlePlayerClick(i)}
+                            className="player-card"
+                            style={{
+                                cursor: 'pointer',
+                                borderLeft: '4px solid var(--success)',
+                                backgroundColor: swapSourceIndex === i ? 'rgba(245, 132, 38, 0.2)' : 'var(--bg-secondary)',
+                                border: swapSourceIndex === i ? '2px solid var(--accent-orange)' : 'none',
+                                borderLeft: swapSourceIndex === i ? '4px solid var(--accent-orange)' : '4px solid var(--success)'
+                            }}
                         >
-                            Next
-                        </button>
-                    </div>
-                    {selectedPlayerIds.length < 5 && (
-                        <p style={{ color: 'var(--danger)', marginTop: '1rem' }}>Need at least 5 players.</p>
-                    )}
-                </>
-            )}
-
-            {step === 2 && (
-                <>
-                    <p className="text-sm" style={{ marginBottom: '1rem' }}>
-                        Drag to reorder.
-                        {rotation && <span style={{ color: 'var(--success)', display: 'block', marginTop: '0.5rem' }}>
-                            Highlighted players start in Period 1.
-                        </span>}
-                    </p>
-
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <SortableContext
-                            items={orderedPlayers.map(p => p.id)}
-                            strategy={verticalListSortingStrategy}
-                        >
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
-                                {orderedPlayers.map((player, index) => (
-                                    <SortablePlayerItem
-                                        key={player.id}
-                                        player={player}
-                                        index={index}
-                                        isStarter={startersIndices.includes(index)}
-                                    />
-                                ))}
+                            <div style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0.5rem' }}>
+                                <span style={{ color: 'var(--text-secondary)', width: '24px', fontSize: '0.8rem' }}>{i + 1}</span>
+                                <div className="jersey-number" style={{ fontSize: '1.2rem', marginRight: '1rem' }}>{player.number}</div>
+                                <div className="player-name" style={{ flex: 1 }}>{player.firstName}</div>
+                                <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--success)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>START</span>
                             </div>
-                        </SortableContext>
-                    </DndContext>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-                    <div className="grid-2">
-                        <button className="btn-secondary" onClick={() => setStep(1)}>Back</button>
-                        <button className="btn-primary" onClick={onStartGame}>Tip Off!</button>
-                    </div>
-                </>
-            )}
+            <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>🪑</span> BENCH
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {bench.map((player, i) => {
+                        const realIndex = i + 5;
+                        return (
+                            <div
+                                key={player.id}
+                                onClick={() => handlePlayerClick(realIndex)}
+                                className="player-card"
+                                style={{
+                                    cursor: 'pointer',
+                                    borderLeft: '4px solid var(--text-secondary)',
+                                    backgroundColor: swapSourceIndex === realIndex ? 'rgba(245, 132, 38, 0.2)' : 'rgba(0,0,0,0.2)',
+                                    border: swapSourceIndex === realIndex ? '2px solid var(--accent-orange)' : 'none',
+                                    borderLeft: swapSourceIndex === realIndex ? '4px solid var(--accent-orange)' : '4px solid var(--text-secondary)',
+                                    opacity: swapSourceIndex === realIndex ? 1 : 0.8
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0.5rem' }}>
+                                    <span style={{ color: 'var(--text-secondary)', width: '24px', fontSize: '0.8rem' }}>{realIndex + 1}</span>
+                                    <div className="jersey-number" style={{ fontSize: '1.2rem', marginRight: '1rem' }}>{player.number}</div>
+                                    <div className="player-name" style={{ flex: 1 }}>{player.firstName}</div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <button
+                className="btn-primary"
+                style={{ width: '100%', padding: '1rem', fontSize: '1.2rem' }}
+                onClick={() => onStartGame(orderedPlayers)}
+            >
+                Tip Off! 🏀
+            </button>
         </div>
     );
 }
