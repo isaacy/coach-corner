@@ -21,15 +21,18 @@ export function GameProvider({ children }) {
         },
         playerStats: {},
         scoringEvents: [],
-        actualParticipation: {} // { periodIndex: [playerId, playerId...] }
+        actualParticipation: {}, // { periodIndex: [playerId, playerId...] }
+        playerIndices: {} // Map playerId -> original roster index
     });
 
     const startGame = useCallback((roster, rotationMatrix) => {
         // Initialize active players based on first period of rotation
         const activePlayers = [];
         const benchPlayers = [];
+        const playerIndices = {};
 
         roster.forEach((player, index) => {
+            playerIndices[player.id] = index;
             const isPlaying = rotationMatrix[index] && rotationMatrix[index][0] === 1;
             if (isPlaying) {
                 activePlayers.push(player);
@@ -71,7 +74,8 @@ export function GameProvider({ children }) {
             },
             playerStats,
             scoringEvents: [],
-            actualParticipation: initialParticipation
+            actualParticipation: initialParticipation,
+            playerIndices
         });
     }, []);
 
@@ -170,9 +174,11 @@ export function GameProvider({ children }) {
             const newActive = [];
             const newBench = [];
 
-            allPlayers.forEach((player, index) => {
-                const playerIndex = allPlayers.findIndex(p => p.id === player.id);
-                const isPlaying = prev.plannedRotation[playerIndex] && prev.plannedRotation[playerIndex][newPeriod] === 1;
+            allPlayers.forEach(player => {
+                // Use the stored original index to look up the plan
+                const originalIndex = prev.playerIndices[player.id];
+                const isPlaying = prev.plannedRotation[originalIndex] && prev.plannedRotation[originalIndex][newPeriod] === 1;
+
                 if (isPlaying) {
                     newActive.push(player);
                 } else {
