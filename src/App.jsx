@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 import { PlayerManager } from './components/PlayerManager';
 import { GameSetup } from './components/GameSetup';
 import { RotationView } from './components/RotationView';
+import { GameProvider } from './contexts/GameContext';
 
 function App() {
-  // Load players from local storage
   const [players, setPlayers] = useState(() => {
     const saved = localStorage.getItem('coachCornerPlayers');
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [view, setView] = useState('roster'); // 'roster', 'setup', 'game'
+  const [view, setView] = useState('roster');
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
   const [gameRoster, setGameRoster] = useState([]);
   const [orderedRoster, setOrderedRoster] = useState([]);
@@ -39,67 +40,57 @@ function App() {
     }
   };
 
-  const updateOrder = (orderedList) => {
-    setOrderedRoster(orderedList);
+  const handleUpdateOrder = (newOrder) => {
+    setOrderedRoster(newOrder);
   };
 
-  const startGame = () => {
-    // Use the ordered list if available, otherwise fallback to filtered list (shouldn't happen if GameSetup works)
+  const handleStartGame = () => {
     const roster = orderedRoster.length > 0 ? orderedRoster : players.filter(p => selectedPlayerIds.includes(p.id));
     setGameRoster(roster);
     setView('game');
   };
 
   return (
-    <div>
-      <header style={{ marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', background: 'linear-gradient(to right, #3b82f6, #10b981)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          CoachCorner
-        </h1>
-        <p className="text-sm">Fair Play Rotation Manager</p>
-      </header>
+    <GameProvider>
+      <div className="app">
+        <header>
+          <h1>🏀 CoachCorner</h1>
+          <nav>
+            <button onClick={() => setView('roster')} className={view === 'roster' ? 'active' : ''}>Team</button>
+            <button onClick={() => setView('setup')} className={view === 'setup' ? 'active' : ''}>Game Setup</button>
+            {gameRoster.length > 0 && (
+              <button onClick={() => setView('game')} className={view === 'game' ? 'active' : ''}>Game Plan</button>
+            )}
+          </nav>
+        </header>
 
-      <nav style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-        <button
-          className={view === 'roster' ? 'btn-primary' : 'btn-secondary'}
-          onClick={() => setView('roster')}
-        >
-          Team Roster
-        </button>
-        <button
-          className={view === 'setup' ? 'btn-primary' : 'btn-secondary'}
-          onClick={() => setView('setup')}
-        >
-          Game Setup
-        </button>
-      </nav>
-
-      <main>
-        {view === 'roster' && (
-          <PlayerManager
-            players={players}
-            onAddPlayer={addPlayer}
-            onRemovePlayer={removePlayer}
-            onEditPlayer={editPlayer}
-          />
-        )}
-        {view === 'setup' && (
-          <GameSetup
-            allPlayers={players}
-            selectedPlayerIds={selectedPlayerIds}
-            onToggleSelection={togglePlayerSelection}
-            onStartGame={startGame}
-            onUpdateOrder={updateOrder}
-          />
-        )}
-        {view === 'game' && (
-          <RotationView
-            roster={gameRoster}
-            onBack={() => setView('setup')}
-          />
-        )}
-      </main>
-    </div>
+        <main>
+          {view === 'roster' && (
+            <PlayerManager
+              players={players}
+              onAddPlayer={addPlayer}
+              onRemovePlayer={removePlayer}
+              onEditPlayer={editPlayer}
+            />
+          )}
+          {view === 'setup' && (
+            <GameSetup
+              allPlayers={players}
+              selectedPlayerIds={selectedPlayerIds}
+              onToggleSelection={togglePlayerSelection}
+              onStartGame={handleStartGame}
+              onUpdateOrder={handleUpdateOrder}
+            />
+          )}
+          {view === 'game' && (
+            <RotationView
+              roster={gameRoster}
+              onBack={() => setView('setup')}
+            />
+          )}
+        </main>
+      </div>
+    </GameProvider>
   );
 }
 
