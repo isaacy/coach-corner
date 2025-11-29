@@ -1,4 +1,15 @@
 export const ROTATIONS = {
+    5: {
+        periods: 8,
+        // Everyone plays all periods
+        matrix: [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1]
+        ]
+    },
     6: {
         periods: 8,
         // Rolling 5 playing (1 sitting)

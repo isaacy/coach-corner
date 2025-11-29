@@ -21,7 +21,7 @@ export function RotationView({ roster, onBack }) {
     return (
       <div className="card">
         <h2>Rotation Not Available</h2>
-        <p>No rotation pattern found for {playerCount} players. Please select between 6 and 12 players.</p>
+        <p>No rotation pattern found for {playerCount} players. Please select between 5 and 12 players.</p>
         <button className="btn-secondary" onClick={onBack}>Back</button>
       </div>
     );
