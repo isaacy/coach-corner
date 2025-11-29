@@ -154,6 +154,57 @@ export function GameProvider({ children }) {
         });
     }, []);
 
+    const undoLastScore = useCallback(() => {
+        setGameState(prev => {
+            if (prev.scoringEvents.length === 0) return prev;
+
+            const lastEvent = prev.scoringEvents[prev.scoringEvents.length - 1];
+
+            // Only allow undoing scores from the current period
+            if (lastEvent.period !== prev.currentPeriod) {
+                alert("Cannot undo scores from previous periods.");
+                return prev;
+            }
+
+            const quarter = Math.floor(prev.currentPeriod / 2);
+            const isOpponent = lastEvent.playerId === 'opponent';
+
+            const newScore = { ...prev.score };
+            const newByQuarter = [...prev.score.byQuarter];
+
+            if (isOpponent) {
+                newScore.opponent -= lastEvent.points;
+                newByQuarter[quarter] = {
+                    ...newByQuarter[quarter],
+                    opponent: newByQuarter[quarter].opponent - lastEvent.points
+                };
+            } else {
+                newScore.team -= lastEvent.points;
+                newByQuarter[quarter] = {
+                    ...newByQuarter[quarter],
+                    team: newByQuarter[quarter].team - lastEvent.points
+                };
+            }
+
+            newScore.byQuarter = newByQuarter;
+
+            const newPlayerStats = { ...prev.playerStats };
+            if (!isOpponent && newPlayerStats[lastEvent.playerId]) {
+                newPlayerStats[lastEvent.playerId] = {
+                    ...newPlayerStats[lastEvent.playerId],
+                    points: newPlayerStats[lastEvent.playerId].points - lastEvent.points
+                };
+            }
+
+            return {
+                ...prev,
+                score: newScore,
+                playerStats: newPlayerStats,
+                scoringEvents: prev.scoringEvents.slice(0, -1)
+            };
+        });
+    }, []);
+
     const nextPeriod = useCallback(() => {
         setGameState(prev => {
             if (prev.currentPeriod >= 7) return prev; // Max 8 periods
@@ -244,6 +295,7 @@ export function GameProvider({ children }) {
             startGame,
             swapPlayer,
             addScore,
+            undoLastScore,
             nextPeriod,
             endGame,
             resetGame

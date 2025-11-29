@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '../contexts/GameContext';
 
 export function ScoreTracker() {
-    const { gameState, addScore } = useGame();
+    const { gameState, addScore, undoLastScore } = useGame();
     const [selectedPlayerId, setSelectedPlayerId] = useState(null);
 
     if (!gameState.isLive) return null;
@@ -30,7 +30,7 @@ export function ScoreTracker() {
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-around',
-                marginBottom: '1.5rem',
+                marginBottom: '1rem',
                 padding: '1rem',
                 backgroundColor: 'var(--bg-primary)',
                 borderRadius: 'var(--radius-md)'
@@ -54,6 +54,27 @@ export function ScoreTracker() {
                         Q{quarter}: {currentQuarterScore.opponent}
                     </div>
                 </div>
+            </div>
+
+            {/* Undo Button */}
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <button
+                    onClick={undoLastScore}
+                    style={{
+                        fontSize: '0.8rem',
+                        padding: '0.25rem 0.75rem',
+                        backgroundColor: 'transparent',
+                        border: '1px solid var(--text-secondary)',
+                        color: 'var(--text-secondary)',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                    }}
+                >
+                    <span>↩</span> Undo Last Score
+                </button>
             </div>
 
             {/* Player Selection */}
