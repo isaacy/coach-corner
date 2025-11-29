@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { ROTATIONS } from '../logic/rotationPatterns';
 import { useGame } from '../contexts/GameContext';
 import { ScoreTracker } from './ScoreTracker';
+import { GameSummary } from './GameSummary';
 
 export function RotationView({ roster, onBack }) {
   const playerCount = roster.length;
@@ -11,6 +12,10 @@ export function RotationView({ roster, onBack }) {
 
   const [showChart, setShowChart] = useState(false);
   const [swapMode, setSwapMode] = useState(null);
+
+  if (gameState.isGameOver) {
+    return <GameSummary />;
+  }
 
   if (!rotationData) {
     return (
@@ -168,17 +173,17 @@ export function RotationView({ roster, onBack }) {
                         const hasPlayed = gameState.actualParticipation[colIndex]?.includes(player.id);
 
                         if (isActive) {
-                          backgroundColor = 'var(--accent-orange)'; // Currently playing -> Orange
-                          opacity = 0.8;
+                          backgroundColor = '#F59E0B'; // Currently playing -> Yellow/Amber
+                          opacity = 0.9;
                         } else if (hasPlayed) {
-                          backgroundColor = 'var(--danger)'; // Subbed out -> Red
-                          opacity = 0.6;
+                          backgroundColor = '#EA580C'; // Subbed out -> Orange
+                          opacity = 0.7;
                         }
                       } else if (isPastPeriod) {
                         const playedInPast = gameState.actualParticipation[colIndex]?.includes(player.id);
                         if (playedInPast) {
-                          backgroundColor = 'var(--danger)'; // Played in past -> Red
-                          opacity = 0.6;
+                          backgroundColor = '#EA580C'; // Played in past -> Orange
+                          opacity = 0.7;
                         }
                       } else if (isFuturePeriod) {
                         // Show planned rotation

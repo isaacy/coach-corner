@@ -5,6 +5,7 @@ const GameContext = createContext(null);
 export function GameProvider({ children }) {
     const [gameState, setGameState] = useState({
         isLive: false,
+        isGameOver: false,
         currentPeriod: 0,
         activePlayers: [],
         benchPlayers: [],
@@ -58,6 +59,7 @@ export function GameProvider({ children }) {
 
         setGameState({
             isLive: true,
+            isGameOver: false,
             currentPeriod: 0,
             activePlayers,
             benchPlayers,
@@ -206,8 +208,34 @@ export function GameProvider({ children }) {
     const endGame = useCallback(() => {
         setGameState(prev => ({
             ...prev,
-            isLive: false
+            isLive: false,
+            isGameOver: true
         }));
+    }, []);
+
+    const resetGame = useCallback(() => {
+        setGameState({
+            isLive: false,
+            isGameOver: false,
+            currentPeriod: 0,
+            activePlayers: [],
+            benchPlayers: [],
+            plannedRotation: null,
+            score: {
+                team: 0,
+                opponent: 0,
+                byQuarter: [
+                    { team: 0, opponent: 0 },
+                    { team: 0, opponent: 0 },
+                    { team: 0, opponent: 0 },
+                    { team: 0, opponent: 0 }
+                ]
+            },
+            playerStats: {},
+            scoringEvents: [],
+            actualParticipation: {},
+            playerIndices: {}
+        });
     }, []);
 
     return (
@@ -217,7 +245,8 @@ export function GameProvider({ children }) {
             swapPlayer,
             addScore,
             nextPeriod,
-            endGame
+            endGame,
+            resetGame
         }}>
             {children}
         </GameContext.Provider>
