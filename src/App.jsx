@@ -3,9 +3,11 @@ import './App.css';
 import { PlayerManager } from './components/PlayerManager';
 import { GameSetup } from './components/GameSetup';
 import { RotationView } from './components/RotationView';
+import { LoadingScreen } from './components/LoadingScreen';
 import { GameProvider } from './contexts/GameContext';
 
 function App() {
+  const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState(() => {
     const saved = localStorage.getItem('coachCornerPlayers');
     return saved ? JSON.parse(saved) : [];
@@ -17,8 +19,20 @@ function App() {
   const [orderedRoster, setOrderedRoster] = useState([]);
 
   useEffect(() => {
+    // Simulate initial loading
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem('coachCornerPlayers', JSON.stringify(players));
   }, [players]);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   const addPlayer = (player) => {
     setPlayers([...players, player]);

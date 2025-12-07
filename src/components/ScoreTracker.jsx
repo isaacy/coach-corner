@@ -83,23 +83,42 @@ export function ScoreTracker() {
                     Who scored?
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                    {gameState.activePlayers.map(player => (
-                        <button
-                            key={player.id}
-                            onClick={() => setSelectedPlayerId(player.id)}
-                            style={{
-                                padding: '0.5rem',
-                                backgroundColor: selectedPlayerId === player.id ? 'var(--accent-orange)' : 'var(--bg-primary)',
-                                border: `2px solid ${selectedPlayerId === player.id ? 'var(--accent-orange)' : 'var(--border-color)'}`,
-                                borderRadius: 'var(--radius-md)',
-                                color: selectedPlayerId === player.id ? 'white' : 'var(--text-primary)',
-                                cursor: 'pointer',
-                                fontSize: '0.8rem'
-                            }}
-                        >
-                            #{player.number}
-                        </button>
-                    ))}
+                    {gameState.activePlayers.map(player => {
+                        // Check for duplicate first names in active players
+                        const isDuplicate = gameState.activePlayers.filter(
+                            p => p.firstName?.toLowerCase() === player.firstName?.toLowerCase()
+                        ).length > 1;
+
+                        const displayName = isDuplicate
+                            ? `${player.firstName} ${player.lastName ? player.lastName.charAt(0) + '.' : ''}`
+                            : player.firstName;
+
+                        return (
+                            <button
+                                key={player.id}
+                                onClick={() => setSelectedPlayerId(player.id)}
+                                style={{
+                                    padding: '0.5rem',
+                                    backgroundColor: selectedPlayerId === player.id ? 'var(--accent-orange)' : 'var(--bg-primary)',
+                                    border: `2px solid ${selectedPlayerId === player.id ? 'var(--accent-orange)' : 'var(--border-color)'}`,
+                                    borderRadius: 'var(--radius-md)',
+                                    color: selectedPlayerId === player.id ? 'white' : 'var(--text-primary)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.2rem'
+                                }}
+                            >
+                                <span style={{ fontWeight: 'bold' }}>#{player.number}</span>
+                                <span style={{ fontSize: '0.75rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+                                    {displayName}
+                                </span>
+                            </button>
+                        );
+                    })}
                     <button
                         onClick={() => setSelectedPlayerId('opponent')}
                         style={{
@@ -109,7 +128,10 @@ export function ScoreTracker() {
                             borderRadius: 'var(--radius-md)',
                             color: selectedPlayerId === 'opponent' ? 'white' : 'var(--text-primary)',
                             cursor: 'pointer',
-                            fontSize: '0.8rem'
+                            fontSize: '0.8rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                         }}
                     >
                         OPP
