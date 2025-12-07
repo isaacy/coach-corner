@@ -1,6 +1,23 @@
 import React, { useState } from 'react';
 
-const FIRST_NAMES = ['James', 'Michael', 'Kobe', 'LeBron', 'Stephen', 'Kevin', 'Chris', 'Dwyane', 'Tim', 'Magic', 'Larry', 'Shaq'];
+const NBA_PLAYERS = [
+    { firstName: 'LeBron', lastName: 'James', number: '23' },
+    { firstName: 'Stephen', lastName: 'Curry', number: '30' },
+    { firstName: 'Kevin', lastName: 'Durant', number: '35' },
+    { firstName: 'Giannis', lastName: 'Antetokounmpo', number: '34' },
+    { firstName: 'Luka', lastName: 'Doncic', number: '77' },
+    { firstName: 'Nikola', lastName: 'Jokic', number: '15' },
+    { firstName: 'Jayson', lastName: 'Tatum', number: '0' },
+    { firstName: 'Joel', lastName: 'Embiid', number: '21' },
+    { firstName: 'Shai', lastName: 'Gilgeous-Alexander', number: '2' },
+    { firstName: 'Anthony', lastName: 'Edwards', number: '5' },
+    { firstName: 'Jimmy', lastName: 'Butler', number: '22' },
+    { firstName: 'Devin', lastName: 'Booker', number: '1' },
+    { firstName: 'Kawhi', lastName: 'Leonard', number: '2' },
+    { firstName: 'Paul', lastName: 'George', number: '13' },
+    { firstName: 'Donovan', lastName: 'Mitchell', number: '45' },
+    { firstName: 'Damian', lastName: 'Lillard', number: '0' }
+];
 
 export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlayer }) {
     const [editingId, setEditingId] = useState(null);
@@ -10,21 +27,26 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
 
     const generateTestPlayers = () => {
         const numPlayers = 8;
-        const usedNumbers = new Set(players.map(p => parseInt(p.number)));
+        const usedNumbers = new Set(players.map(p => p.number));
+
+        // Shuffle NBA players
+        const shuffled = [...NBA_PLAYERS].sort(() => 0.5 - Math.random());
 
         for (let i = 0; i < numPlayers; i++) {
-            let jerseyNum;
-            do {
-                jerseyNum = Math.floor(Math.random() * 99) + 1;
-            } while (usedNumbers.has(jerseyNum));
+            const candidate = shuffled[i % shuffled.length];
 
-            usedNumbers.add(jerseyNum);
+            // Ensure unique number if possible
+            let jerseyNum = candidate.number;
+            while (usedNumbers.has(jerseyNum)) {
+                jerseyNum = Math.floor(Math.random() * 99) + 1;
+            }
+            usedNumbers.add(jerseyNum.toString());
 
             const player = {
                 id: Date.now().toString() + i,
-                firstName: FIRST_NAMES[i % FIRST_NAMES.length],
-                lastName: '',
-                number: jerseyNum
+                firstName: candidate.firstName,
+                lastName: candidate.lastName,
+                number: jerseyNum.toString()
             };
 
             onAddPlayer(player);

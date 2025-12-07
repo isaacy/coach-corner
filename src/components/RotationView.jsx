@@ -64,6 +64,8 @@ export function RotationView({ roster, onBack }) {
     }
   };
 
+  const [showEndGameModal, setShowEndGameModal] = useState(false);
+
   const handleNextPeriod = () => {
     nextPeriod();
     if (scrollContainerRef.current) {
@@ -71,24 +73,68 @@ export function RotationView({ roster, onBack }) {
     }
   };
 
-  const handleEndGame = () => {
-    if (window.confirm('End the game? You can view the final stats.')) {
-      endGame();
-    }
+  const confirmEndGame = () => {
+    endGame();
+    setShowEndGameModal(false);
   };
 
   // Live Mode View
   if (gameState.isLive) {
     const quarter = Math.floor(gameState.currentPeriod / 2) + 1;
     const session = (gameState.currentPeriod % 2) + 1;
+    const isLastPeriod = gameState.currentPeriod === 7;
 
     return (
-      <div className="card" style={{ padding: '1rem' }}>
+      <div className="card" style={{ padding: '1rem', position: 'relative' }}>
+        {/* Custom Modal */}
+        {showEndGameModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              backgroundColor: 'var(--bg-secondary)',
+              padding: '1.5rem',
+              borderRadius: 'var(--radius-lg)',
+              maxWidth: '300px',
+              width: '90%',
+              textAlign: 'center',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+            }}>
+              <h3 style={{ marginBottom: '1rem', color: 'white' }}>End Game?</h3>
+              <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
+                Are you sure you want to end the game? You can view the final stats.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowEndGameModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={confirmEndGame}
+                  style={{ backgroundColor: 'var(--danger)', color: 'white' }}
+                >
+                  End Game
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex-between" style={{ marginBottom: '1rem' }}>
           <h2>Live Game</h2>
-          <button className="btn-secondary" onClick={handleEndGame} style={{ fontSize: '0.8rem' }}>
-            End Game
-          </button>
+          {/* Removed top right End Game button */}
         </div>
 
         <div style={{
@@ -278,7 +324,21 @@ export function RotationView({ roster, onBack }) {
           </div>
         </div>
 
-        {gameState.currentPeriod < 7 && (
+        {isLastPeriod ? (
+          <button
+            className="btn-primary"
+            onClick={() => setShowEndGameModal(true)}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              fontSize: '1rem',
+              backgroundColor: 'var(--danger)',
+              color: 'white'
+            }}
+          >
+            End Game ⏹
+          </button>
+        ) : (
           <button
             className="btn-primary"
             onClick={handleNextPeriod}

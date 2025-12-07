@@ -3,6 +3,7 @@ import './App.css';
 import { PlayerManager } from './components/PlayerManager';
 import { GameSetup } from './components/GameSetup';
 import { RotationView } from './components/RotationView';
+import { ScoreKeeper } from './components/ScoreKeeper';
 import { LoadingScreen } from './components/LoadingScreen';
 import { GameProvider } from './contexts/GameContext';
 
@@ -72,6 +73,7 @@ function App() {
           <nav>
             <button onClick={() => setView('roster')} className={view === 'roster' ? 'active' : ''}>Team</button>
             <button onClick={() => setView('setup')} className={view === 'setup' ? 'active' : ''}>Game Setup</button>
+            <button onClick={() => setView('keeper')} className={view === 'keeper' ? 'active' : ''}>Score</button>
             {gameRoster.length > 0 && (
               <button onClick={() => setView('game')} className={view === 'game' ? 'active' : ''}>Game Plan</button>
             )}
@@ -95,6 +97,9 @@ function App() {
               onStartGame={handleStartGame}
               onUpdateOrder={handleUpdateOrder}
             />
+          )}
+          {view === 'keeper' && (
+            <ScoreKeeper />
           )}
           {view === 'game' && (
             <RotationView
